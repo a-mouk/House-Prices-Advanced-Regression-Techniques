@@ -99,11 +99,9 @@ all_data_Objs = all_data_1.select_dtypes(exclude=['float64', 'int64'])
 print(all_data_Objs)
 
 stat = all_data_1.describe()
-print("Βασικά στατιστικά μεγέθη:")
 print_full(stat)
 
 
-print("Παράδειγμα κατηγορικής μεταβλητής πριν τη μετατροπή σε αριθμητική:")
 print(all_data_1[['ExterQual']])
 ExGd = ['ExterQual', 'ExterCond', 'BsmtQual', 'BsmtCond', 'HeatingQC', 
         'KitchenQual', 'FireplaceQu', 'GarageQual', 'GarageCond', 'PoolQC']
@@ -155,7 +153,6 @@ rank_A = corr[['corr']].sort_values('corr', ascending=False)
 
 rank_B = all_data_1.std(axis = 0).rename_axis('variable').to_frame('std')
 rank_B = rank_B.sort_values('std', ascending=False)
-print("Tυπική απόκλιση για κάθε μεταβλητή και διάταξη σε φθίνουσα σειρά (Κατάταξη Β)")
 print(rank_B)
 
 objs = list(all_data_Objs1)
@@ -229,7 +226,6 @@ corr_norm = corr_norm.abs()
 
 corr_norm['corr'] = corr_norm.sum(axis=1)
 rank_C = corr_norm[['corr']].sort_values('corr', ascending=False)
-print("Αθροιστικοί συντελεστές συσχέτισης για κάθε κανονικοποιημένη μεταβλητή και διάταξη σε φθίνουσα σειρά (Κατάταξη C)")
 print(rank_C)
 
 all_data_norm.drop([
@@ -240,22 +236,18 @@ all_data_norm.drop([
 
 rank_D = all_data_norm.std(axis = 0).rename_axis('variable').to_frame('std')
 rank_D = rank_D.sort_values('std', ascending=False)
-print("Tυπική απόκλιση για κάθε κανονικοποιημένη μεταβλητή και διάταξη σε φθίνουσα σειρά (Κατάταξη D)")
 print(rank_D)
 
 all_data_norm.reset_index(drop=True, inplace=True)
 OneHotObjs_2.reset_index(drop=True, inplace=True)
 
 all_data_OH_norm = pd.concat( [all_data_norm, OneHotObjs_2], axis=1)
-print("συγχώνευση πινάκων αριθμητικών και νυν αριθμητικών (μετασχηματισμένες κατηγορικές μέσω one hot encoding) μεταβλητών.")
-print("Σημείωση: κάνοντας πείραμα με clustering και regression σε αυτόν τον πίνακα (χωρίς PCA δηλαδή), κάτι το οποίο δεν προβλέπεται απο την εκφώνηση, ήρθε το καλύτερο score")
 print(all_data_OH_norm)
 
 
 
 print("all_data_OH_norm")
 print(all_data_OH_norm)
-# εισαγωγή αλγορίθμου k-means από τη scikit-learn & μεθόδου silhouette για επιλογή k
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
 
@@ -272,10 +264,10 @@ sse = {}
 for k in range(1, 10):
     kmeans = KMeans(n_clusters=k, random_state=1)
     kmeans.fit(all_data_OH_norm)
-    sse[k] = kmeans.inertia_ # άθροισμα τετραγωνικών αποστάσεων προς το κοντινότερο κέντρο συστάδας
+    sse[k] = kmeans.inertia_ 
 
 plt.figure(1, figsize = (15, 10))
-plt.title('Μέθοδος Elbow για επιλογή k για k-means')
+plt.title(' Elbow  k-means')
 plt.xlabel('k'); plt.ylabel('SSE')
 sns.pointplot(x=list(sse.keys()), y=list(sse.values()))
 plt.show()
@@ -299,14 +291,12 @@ cluster_1 = all_data_OH_norm[all_data_OH_norm["Cluster"] == 1]
 cluster_0.drop(['Cluster'], axis=1, inplace=True)
 cluster_1.drop(['Cluster'], axis=1, inplace=True)
 
-print("εγγραφές από τα περιεχόμενα της πρώτης συστάδας:")
 print(cluster_0.head(3))
 
 train_i = train[['Id','SalePrice']]
 
 c_0 = pd.merge(cluster_0, train_i, left_on='id', right_on='Id', how='left')
 c_0.drop(['Id'], axis=1, inplace=True)
-print("περιεχόμενα πρώτου cluster με τις SalePrice τους")
 print(c_0)
 
 c_1 = pd.merge(cluster_1, train_i, left_on='id', right_on='Id', how='left')
@@ -330,7 +320,6 @@ train_c1.drop(['id'], axis=1, inplace=True)
 test_c1.drop(['id'], axis=1, inplace=True)
 test_c1.drop(['SalePrice'], axis=1, inplace=True)
 
-print("εγγραφές της πρώτης συστάδας οι οποίες προέρχονται απο το train.csv:")
 test_c0.head(3)
 
 from sklearn.model_selection import train_test_split
@@ -361,7 +350,6 @@ def GBR(train_c, test_c, test_c_id):
     print('MAE:', metrics.mean_absolute_error(y_test, clf_pred))
     print('MSE:', metrics.mean_squared_error(y_test, clf_pred))
     print('RMSE:', np.sqrt(metrics.mean_squared_error(y_test, clf_pred)))
-    print("γραφική αναπαράσταση πραγματικών τιμών προς τιμές που προβλέφθηκαν ( συστάδα)")
     plt.figure(figsize=(15,8))
     plt.scatter(y_test,clf_pred, c= 'brown')
     plt.xlabel('Y Test')
